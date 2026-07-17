@@ -43,6 +43,18 @@ interface UseMcpAppReturn {
   openLink: (url: string) => Promise<void>;
 }
 
+function normalizeHttpUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url, window.location.href);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
 export function useMcpApp({
   appName,
   appVersion = "1.0.0",
@@ -102,15 +114,23 @@ export function useMcpApp({
 
   const openLink = useCallback<UseMcpAppReturn["openLink"]>(
     async (url) => {
+      const normalizedUrl = normalizeHttpUrl(url);
+      if (!normalizedUrl) return;
+
       if (!app) {
-        window.open(url, "_blank", "noopener,noreferrer");
+        window.open(normalizedUrl, "_blank", "noopener,noreferrer");
         return;
       }
-      const result = await app.openLink({ url });
-      // The host may deny the request (e.g. blocked domain or user cancelled).
-      // Fall back to a direct window.open so the link still works.
-      if (result?.isError) {
-        window.open(url, "_blank", "noopener,noreferrer");
+
+      try {
+        const result = await app.openLink({ url: normalizedUrl });
+        // Respect host denials/cancellations and do not bypass host policy.
+        if (result?.isError) {
+          return;
+        }
+      } catch {
+        // Fall back only when host link opening fails unexpectedly.
+        window.open(normalizedUrl, "_blank", "noopener,noreferrer");
       }
     },
     [app]

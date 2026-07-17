@@ -1193,526 +1193,526 @@ function CreateIssueApp() {
     );
   };
 
-  const body_node = (() => {
-  if (appError) {
-    return (
-      <Flash variant="danger" sx={{ m: 2 }}>
-        Connection error: {appError.message}
-      </Flash>
-    );
-  }
-
-  if (!app) {
-    return (
-      <Box display="flex" alignItems="center" justifyContent="center" p={4}>
-        <Spinner size="medium" />
-      </Box>
-    );
-  }
-
-  if (successIssue) {
-    return (
-      <SuccessView
-        issue={successIssue}
-        owner={owner}
-        repo={repo}
-        submittedTitle={title}
-        submittedLabels={selectedLabels}
-        isUpdate={isUpdateMode}
-        openLink={openLink}
-      />
-    );
-  }
-
-  return (
-    <Box
-      borderWidth={1}
-      borderStyle="solid"
-      borderColor="border.default"
-      borderRadius={2}
-      bg="canvas.subtle"
-      p={3}
-    >
-      {/* Repository picker */}
-      <Box
-        display="flex"
-        alignItems="center"
-        gap={2}
-        mb={3}
-        pb={2}
-        borderBottomWidth={1}
-        borderBottomStyle="solid"
-        borderBottomColor="border.default"
-        sx={{ minWidth: 0, overflow: "hidden" }}
-      >
-        <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
-          <ActionMenu>
-            <ActionMenu.Button
-              size="small"
-              leadingVisual={selectedRepo?.isPrivate ? LockIcon : RepoIcon}
-              sx={{ maxWidth: "100%", overflow: "hidden", "& > span:last-child": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }}
-            >
-              {selectedRepo ? selectedRepo.fullName : "Select repository"}
-            </ActionMenu.Button>
-          <ActionMenu.Overlay width="medium">
-            <ActionList selectionVariant="single">
-              <Box px={3} py={2}>
-                <TextInput
-                  placeholder="Search repositories..."
-                  value={repoFilter}
-                  onChange={(e) => setRepoFilter(e.target.value)}
-                  sx={{ width: "100%" }}
-                  size="small"
-                  autoFocus
-                />
-              </Box>
-              <ActionList.Divider />
-              {repoSearchLoading ? (
-                <Box display="flex" justifyContent="center" p={3}>
-                  <Spinner size="small" />
-                </Box>
-              ) : repoSearchResults.length > 0 ? (
-                repoSearchResults.map((r) => (
-                  <ActionList.Item
-                    key={r.id}
-                    selected={selectedRepo?.id === r.id}
-                    onSelect={() => {
-                      setSelectedRepo(r);
-                      setRepoFilter("");
-                      // Clear metadata when switching repos
-                      setAvailableLabels([]);
-                      setSelectedLabels([]);
-                      setAvailableAssignees([]);
-                      setSelectedAssignees([]);
-                      setAvailableMilestones([]);
-                      setSelectedMilestone(null);
-                      setAvailableIssueTypes([]);
-                      setSelectedIssueType(null);
-                      setAvailableIssueFields([]);
-                      setFieldValues({});
-                    }}
-                  >
-                    <ActionList.LeadingVisual>
-                      {r.isPrivate ? <LockIcon /> : <RepoIcon />}
-                    </ActionList.LeadingVisual>
-                    {r.fullName}
-                  </ActionList.Item>
-                ))
-              ) : selectedRepo ? (
-                <ActionList.Item
-                  key={selectedRepo.id}
-                  selected
-                  onSelect={() => setRepoFilter("")}
-                >
-                  <ActionList.LeadingVisual>
-                    {selectedRepo.isPrivate ? <LockIcon /> : <RepoIcon />}
-                  </ActionList.LeadingVisual>
-                  {selectedRepo.fullName}
-                </ActionList.Item>
-              ) : (
-                <Box px={3} py={2}>
-                  <Text sx={{ color: "fg.muted", fontSize: 1 }}>
-                    Type to search repositories...
-                  </Text>
-                </Box>
-              )}
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
-        </Box>
-      </Box>
-
-      {/* Error banner */}
-      {error && (
-        <Flash variant="danger" sx={{ mb: 3 }}>
-          {error}
+  const bodyNode = (() => {
+    if (appError) {
+      return (
+        <Flash variant="danger" sx={{ m: 2 }}>
+          Connection error: {appError.message}
         </Flash>
-      )}
+      );
+    }
 
-      {/* Title */}
-      <FormControl sx={{ mb: 3 }}>
-        <FormControl.Label sx={{ fontWeight: "semibold" }}>
-          Title
-        </FormControl.Label>
-        <TextInput
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          block
-          contrast
+    if (!app) {
+      return (
+        <Box display="flex" alignItems="center" justifyContent="center" p={4}>
+          <Spinner size="medium" />
+        </Box>
+      );
+    }
+
+    if (successIssue) {
+      return (
+        <SuccessView
+          issue={successIssue}
+          owner={owner}
+          repo={repo}
+          submittedTitle={title}
+          submittedLabels={selectedLabels}
+          isUpdate={isUpdateMode}
+          openLink={openLink}
         />
-      </FormControl>
+      );
+    }
 
-      {/* Description */}
-      <Box sx={{ mb: 3 }}>
-        <Text
-          as="label"
-          sx={{ fontWeight: "semibold", fontSize: 1, display: "block", mb: 2 }}
+    return (
+      <Box
+        borderWidth={1}
+        borderStyle="solid"
+        borderColor="border.default"
+        borderRadius={2}
+        bg="canvas.subtle"
+        p={3}
+      >
+        {/* Repository picker */}
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={2}
+          mb={3}
+          pb={2}
+          borderBottomWidth={1}
+          borderBottomStyle="solid"
+          borderBottomColor="border.default"
+          sx={{ minWidth: 0, overflow: "hidden" }}
         >
-          Description
-        </Text>
-        <MarkdownEditor
-          value={body}
-          onChange={setBody}
-          placeholder="Add a description..."
-        />
-      </Box>
-
-      {/* Metadata section */}
-      <Box display="flex" gap={4} mb={3} sx={{ flexWrap: "wrap" }}>
-        {/* Labels dropdown */}
-        <ActionMenu>
-          <ActionMenu.Button size="small" leadingVisual={TagIcon}>
-            Labels
-            {selectedLabels.length > 0 && (
-              <CounterLabel sx={{ ml: 1 }}>{selectedLabels.length}</CounterLabel>
-            )}
-          </ActionMenu.Button>
-          <ActionMenu.Overlay width="medium">
-            <Box p={2} borderBottomWidth={1} borderBottomStyle="solid" borderBottomColor="border.default">
-              <TextInput
-                placeholder="Filter labels"
-                value={labelsFilter}
-                onChange={(e) => setLabelsFilter(e.target.value)}
+          <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
+            <ActionMenu>
+              <ActionMenu.Button
                 size="small"
-                block
-              />
-            </Box>
-            <ActionList selectionVariant="multiple">
-              {labelsLoading ? (
-                <ActionList.Item disabled>
-                  <Spinner size="small" /> Loading...
-                </ActionList.Item>
-              ) : filteredLabels.length === 0 ? (
-                <ActionList.Item disabled>No labels available</ActionList.Item>
-              ) : (
-                filteredLabels.map((label) => (
+                leadingVisual={selectedRepo?.isPrivate ? LockIcon : RepoIcon}
+                sx={{ maxWidth: "100%", overflow: "hidden", "& > span:last-child": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }}
+              >
+                {selectedRepo ? selectedRepo.fullName : "Select repository"}
+              </ActionMenu.Button>
+            <ActionMenu.Overlay width="medium">
+              <ActionList selectionVariant="single">
+                <Box px={3} py={2}>
+                  <TextInput
+                    placeholder="Search repositories..."
+                    value={repoFilter}
+                    onChange={(e) => setRepoFilter(e.target.value)}
+                    sx={{ width: "100%" }}
+                    size="small"
+                    autoFocus
+                  />
+                </Box>
+                <ActionList.Divider />
+                {repoSearchLoading ? (
+                  <Box display="flex" justifyContent="center" p={3}>
+                    <Spinner size="small" />
+                  </Box>
+                ) : repoSearchResults.length > 0 ? (
+                  repoSearchResults.map((r) => (
+                    <ActionList.Item
+                      key={r.id}
+                      selected={selectedRepo?.id === r.id}
+                      onSelect={() => {
+                        setSelectedRepo(r);
+                        setRepoFilter("");
+                        // Clear metadata when switching repos
+                        setAvailableLabels([]);
+                        setSelectedLabels([]);
+                        setAvailableAssignees([]);
+                        setSelectedAssignees([]);
+                        setAvailableMilestones([]);
+                        setSelectedMilestone(null);
+                        setAvailableIssueTypes([]);
+                        setSelectedIssueType(null);
+                        setAvailableIssueFields([]);
+                        setFieldValues({});
+                      }}
+                    >
+                      <ActionList.LeadingVisual>
+                        {r.isPrivate ? <LockIcon /> : <RepoIcon />}
+                      </ActionList.LeadingVisual>
+                      {r.fullName}
+                    </ActionList.Item>
+                  ))
+                ) : selectedRepo ? (
                   <ActionList.Item
-                    key={label.id}
-                    selected={selectedLabels.some((l) => l.id === label.id)}
-                    onSelect={() => {
-                      setSelectedLabels((prev) =>
-                        prev.some((l) => l.id === label.id)
-                          ? prev.filter((l) => l.id !== label.id)
-                          : [...prev, label]
-                      );
-                    }}
+                    key={selectedRepo.id}
+                    selected
+                    onSelect={() => setRepoFilter("")}
                   >
                     <ActionList.LeadingVisual>
-                      <Box
-                        sx={{
-                          width: 14,
-                          height: 14,
-                          borderRadius: "50%",
-                          backgroundColor: `#${label.color}`,
-                        }}
-                      />
+                      {selectedRepo.isPrivate ? <LockIcon /> : <RepoIcon />}
                     </ActionList.LeadingVisual>
-                    {label.text}
+                    {selectedRepo.fullName}
                   </ActionList.Item>
-                ))
-              )}
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
-
-        {/* Assignees dropdown */}
-        <ActionMenu>
-          <ActionMenu.Button size="small" leadingVisual={PersonIcon}>
-            Assignees
-            {selectedAssignees.length > 0 && (
-              <CounterLabel sx={{ ml: 1 }}>{selectedAssignees.length}</CounterLabel>
-            )}
-          </ActionMenu.Button>
-          <ActionMenu.Overlay width="medium">
-            <Box p={2} borderBottomWidth={1} borderBottomStyle="solid" borderBottomColor="border.default">
-              <TextInput
-                placeholder="Search people"
-                value={assigneesFilter}
-                onChange={(e) => setAssigneesFilter(e.target.value)}
-                size="small"
-                block
-              />
-            </Box>
-            <ActionList selectionVariant="multiple">
-              {assigneesLoading ? (
-                <ActionList.Item disabled>
-                  <Spinner size="small" /> Loading...
-                </ActionList.Item>
-              ) : filteredAssignees.length === 0 ? (
-                <ActionList.Item disabled>No assignees available</ActionList.Item>
-              ) : (
-                filteredAssignees.map((assignee) => (
-                  <ActionList.Item
-                    key={assignee.id}
-                    selected={selectedAssignees.some((a) => a.id === assignee.id)}
-                    onSelect={() => {
-                      setSelectedAssignees((prev) =>
-                        prev.some((a) => a.id === assignee.id)
-                          ? prev.filter((a) => a.id !== assignee.id)
-                          : [...prev, assignee]
-                      );
-                    }}
-                  >
-                    {assignee.text}
-                  </ActionList.Item>
-                ))
-              )}
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
-
-        {/* Milestones dropdown */}
-        <ActionMenu>
-          <ActionMenu.Button size="small" leadingVisual={MilestoneIcon}>
-            {selectedMilestone ? selectedMilestone.text : "Milestone"}
-          </ActionMenu.Button>
-          <ActionMenu.Overlay width="medium">
-            <ActionList selectionVariant="single">
-              {milestonesLoading ? (
-                <ActionList.Item disabled>
-                  <Spinner size="small" /> Loading...
-                </ActionList.Item>
-              ) : availableMilestones.length === 0 ? (
-                <ActionList.Item disabled>No milestones</ActionList.Item>
-              ) : (
-                <>
-                  {selectedMilestone && (
-                    <ActionList.Item
-                      onSelect={() => setSelectedMilestone(null)}
-                    >
-                      Clear selection
-                    </ActionList.Item>
-                  )}
-                  {availableMilestones.map((milestone) => (
-                    <ActionList.Item
-                      key={milestone.id}
-                      selected={selectedMilestone?.id === milestone.id}
-                      onSelect={() => setSelectedMilestone(milestone)}
-                    >
-                      {milestone.text}
-                      {milestone.description && (
-                        <ActionList.Description>
-                          {milestone.description}
-                        </ActionList.Description>
-                      )}
-                    </ActionList.Item>
-                  ))}
-                </>
-              )}
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
-
-        {/* Issue Types dropdown */}
-        <ActionMenu>
-          <ActionMenu.Button size="small" leadingVisual={IssueOpenedIcon}>
-            {selectedIssueType ? selectedIssueType.text : "Type"}
-          </ActionMenu.Button>
-          <ActionMenu.Overlay width="medium">
-            <ActionList selectionVariant="single">
-              {issueTypesLoading ? (
-                <ActionList.Item disabled>
-                  <Spinner size="small" /> Loading...
-                </ActionList.Item>
-              ) : availableIssueTypes.length === 0 ? (
-                <ActionList.Item disabled>No issue types</ActionList.Item>
-              ) : (
-                <>
-                  {selectedIssueType && (
-                    <ActionList.Item
-                      onSelect={() => setSelectedIssueType(null)}
-                    >
-                      Clear selection
-                    </ActionList.Item>
-                  )}
-                  {availableIssueTypes.map((type) => (
-                    <ActionList.Item
-                      key={type.id}
-                      selected={selectedIssueType?.id === type.id}
-                      onSelect={() => setSelectedIssueType(type)}
-                    >
-                      {type.text}
-                    </ActionList.Item>
-                  ))}
-                </>
-              )}
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
-      </Box>
-
-      {/* Fields section */}
-      {availableIssueFields.length > 0 && (
-        <Box mb={3}>
-          <Text sx={{ fontWeight: "semibold", display: "block", mb: 3 }}>
-            Fields
-          </Text>
-          <Box
-            display="grid"
-            sx={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}
-          >
-            {availableIssueFields.map((field) => {
-              const fieldValue = fieldValues[field.name];
-              const hasFieldValue =
-                fieldValue &&
-                !fieldValue.cleared &&
-                (fieldValue.optionName !== undefined ||
-                  (fieldValue.value !== undefined && fieldValue.value !== ""));
-
-              return (
-                <Box key={field.id || field.name}>
-                  <Text sx={{ fontWeight: "semibold", fontSize: 1, display: "block" }}>
-                    {field.name}
-                  </Text>
-                  {field.description && (
-                    <Text sx={{ color: "fg.muted", fontSize: 0, display: "block", mt: 1, mb: 2 }}>
-                      {field.description}
+                ) : (
+                  <Box px={3} py={2}>
+                    <Text sx={{ color: "fg.muted", fontSize: 1 }}>
+                      Type to search repositories...
                     </Text>
-                  )}
-                  <Box display="flex" alignItems="center" gap={2} mt={field.description ? 0 : 2}>
-                    {renderIssueFieldInput(field)}
-                    {hasFieldValue && (
-                      <Button
-                        variant="invisible"
-                        size="small"
-                        sx={{ fontSize: 0, color: "fg.muted" }}
-                        onClick={() => updateIssueFieldValue(field.name, { cleared: true })}
-                      >
-                        Clear
-                      </Button>
-                    )}
                   </Box>
-                </Box>
-              );
-            })}
+                )}
+              </ActionList>
+            </ActionMenu.Overlay>
+          </ActionMenu>
           </Box>
         </Box>
-      )}
-
-      {/* Selected labels display */}
-      {selectedLabels.length > 0 && (
-        <Box display="flex" gap={1} mb={3} flexWrap="wrap">
-          {selectedLabels.map((label) => (
-            <Label
-              key={label.id}
-              sx={{
-                backgroundColor: `#${label.color}`,
-                color: getContrastColor(label.color),
-                borderColor: `#${label.color}`,
-              }}
-            >
-              {label.text}
-            </Label>
-          ))}
+  
+        {/* Error banner */}
+        {error && (
+          <Flash variant="danger" sx={{ mb: 3 }}>
+            {error}
+          </Flash>
+        )}
+  
+        {/* Title */}
+        <FormControl sx={{ mb: 3 }}>
+          <FormControl.Label sx={{ fontWeight: "semibold" }}>
+            Title
+          </FormControl.Label>
+          <TextInput
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+            block
+            contrast
+          />
+        </FormControl>
+  
+        {/* Description */}
+        <Box sx={{ mb: 3 }}>
+          <Text
+            as="label"
+            sx={{ fontWeight: "semibold", fontSize: 1, display: "block", mb: 2 }}
+          >
+            Description
+          </Text>
+          <MarkdownEditor
+            value={body}
+            onChange={setBody}
+            placeholder="Add a description..."
+          />
         </Box>
-      )}
-
-      {/* Selected metadata display */}
-      {(selectedAssignees.length > 0 || selectedMilestone) && (
-        <Box mb={3} sx={{ fontSize: 0, color: "fg.muted" }}>
-          {selectedAssignees.length > 0 && (
-            <Text as="div">
-              Assigned to: {selectedAssignees.map((a) => a.text).join(", ")}
-            </Text>
-          )}
-          {selectedMilestone && (
-            <Text as="div">Milestone: {selectedMilestone.text}</Text>
-          )}
-        </Box>
-      )}
-
-      {/* State and submit actions */}
-      <Box
-        display="flex"
-        justifyContent={isUpdateMode ? "space-between" : "flex-end"}
-        alignItems="center"
-        gap={3}
-        sx={{ flexWrap: "wrap" }}
-      >
-        {isUpdateMode && (
-          <Box>
-            {currentState === "open" ? (
-              <>
-                <Box display="flex" alignItems="center" gap={0}>
-                  <Button
-                    size="small"
-                    variant="danger"
-                    onClick={() => void handleSubmit("closed")}
-                    disabled={isSubmitting || !title.trim() || (stateReason === "duplicate" && !duplicateOf.trim())}
-                    sx={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-                  >
-                    Close issue
-                  </Button>
-                  <ActionMenu>
-                    <ActionMenu.Button
-                      size="small"
-                      sx={{ ml: "-1px", borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+  
+        {/* Metadata section */}
+        <Box display="flex" gap={4} mb={3} sx={{ flexWrap: "wrap" }}>
+          {/* Labels dropdown */}
+          <ActionMenu>
+            <ActionMenu.Button size="small" leadingVisual={TagIcon}>
+              Labels
+              {selectedLabels.length > 0 && (
+                <CounterLabel sx={{ ml: 1 }}>{selectedLabels.length}</CounterLabel>
+              )}
+            </ActionMenu.Button>
+            <ActionMenu.Overlay width="medium">
+              <Box p={2} borderBottomWidth={1} borderBottomStyle="solid" borderBottomColor="border.default">
+                <TextInput
+                  placeholder="Filter labels"
+                  value={labelsFilter}
+                  onChange={(e) => setLabelsFilter(e.target.value)}
+                  size="small"
+                  block
+                />
+              </Box>
+              <ActionList selectionVariant="multiple">
+                {labelsLoading ? (
+                  <ActionList.Item disabled>
+                    <Spinner size="small" /> Loading...
+                  </ActionList.Item>
+                ) : filteredLabels.length === 0 ? (
+                  <ActionList.Item disabled>No labels available</ActionList.Item>
+                ) : (
+                  filteredLabels.map((label) => (
+                    <ActionList.Item
+                      key={label.id}
+                      selected={selectedLabels.some((l) => l.id === label.id)}
+                      onSelect={() => {
+                        setSelectedLabels((prev) =>
+                          prev.some((l) => l.id === label.id)
+                            ? prev.filter((l) => l.id !== label.id)
+                            : [...prev, label]
+                        );
+                      }}
                     >
-                      {selectedStateReason.label}
-                    </ActionMenu.Button>
-                    <ActionMenu.Overlay width="medium">
-                      <ActionList selectionVariant="single">
-                        {stateReasonOptions.map((option) => (
-                          <ActionList.Item
-                            key={option.value}
-                            selected={stateReason === option.value}
-                            onSelect={() => setStateReason(option.value)}
-                          >
-                            {option.label}
-                            <ActionList.Description>{option.description}</ActionList.Description>
-                          </ActionList.Item>
-                        ))}
-                      </ActionList>
-                    </ActionMenu.Overlay>
-                  </ActionMenu>
-                </Box>
-                {stateReason === "duplicate" && (
-                  <FormControl sx={{ mt: 2 }}>
-                    <FormControl.Label sx={{ fontSize: 0 }}>Duplicate of</FormControl.Label>
-                    <TextInput
-                      type="number"
-                      placeholder="Issue number"
-                      value={duplicateOf}
-                      onChange={(e) => setDuplicateOf(e.target.value)}
-                      size="small"
-                      sx={{ width: 140 }}
-                    />
-                  </FormControl>
+                      <ActionList.LeadingVisual>
+                        <Box
+                          sx={{
+                            width: 14,
+                            height: 14,
+                            borderRadius: "50%",
+                            backgroundColor: `#${label.color}`,
+                          }}
+                        />
+                      </ActionList.LeadingVisual>
+                      {label.text}
+                    </ActionList.Item>
+                  ))
                 )}
-              </>
-            ) : (
-              <Button
-                size="small"
-                onClick={() => void handleSubmit("open")}
-                disabled={isSubmitting || !title.trim()}
+              </ActionList>
+            </ActionMenu.Overlay>
+          </ActionMenu>
+  
+          {/* Assignees dropdown */}
+          <ActionMenu>
+            <ActionMenu.Button size="small" leadingVisual={PersonIcon}>
+              Assignees
+              {selectedAssignees.length > 0 && (
+                <CounterLabel sx={{ ml: 1 }}>{selectedAssignees.length}</CounterLabel>
+              )}
+            </ActionMenu.Button>
+            <ActionMenu.Overlay width="medium">
+              <Box p={2} borderBottomWidth={1} borderBottomStyle="solid" borderBottomColor="border.default">
+                <TextInput
+                  placeholder="Search people"
+                  value={assigneesFilter}
+                  onChange={(e) => setAssigneesFilter(e.target.value)}
+                  size="small"
+                  block
+                />
+              </Box>
+              <ActionList selectionVariant="multiple">
+                {assigneesLoading ? (
+                  <ActionList.Item disabled>
+                    <Spinner size="small" /> Loading...
+                  </ActionList.Item>
+                ) : filteredAssignees.length === 0 ? (
+                  <ActionList.Item disabled>No assignees available</ActionList.Item>
+                ) : (
+                  filteredAssignees.map((assignee) => (
+                    <ActionList.Item
+                      key={assignee.id}
+                      selected={selectedAssignees.some((a) => a.id === assignee.id)}
+                      onSelect={() => {
+                        setSelectedAssignees((prev) =>
+                          prev.some((a) => a.id === assignee.id)
+                            ? prev.filter((a) => a.id !== assignee.id)
+                            : [...prev, assignee]
+                        );
+                      }}
+                    >
+                      {assignee.text}
+                    </ActionList.Item>
+                  ))
+                )}
+              </ActionList>
+            </ActionMenu.Overlay>
+          </ActionMenu>
+  
+          {/* Milestones dropdown */}
+          <ActionMenu>
+            <ActionMenu.Button size="small" leadingVisual={MilestoneIcon}>
+              {selectedMilestone ? selectedMilestone.text : "Milestone"}
+            </ActionMenu.Button>
+            <ActionMenu.Overlay width="medium">
+              <ActionList selectionVariant="single">
+                {milestonesLoading ? (
+                  <ActionList.Item disabled>
+                    <Spinner size="small" /> Loading...
+                  </ActionList.Item>
+                ) : availableMilestones.length === 0 ? (
+                  <ActionList.Item disabled>No milestones</ActionList.Item>
+                ) : (
+                  <>
+                    {selectedMilestone && (
+                      <ActionList.Item
+                        onSelect={() => setSelectedMilestone(null)}
+                      >
+                        Clear selection
+                      </ActionList.Item>
+                    )}
+                    {availableMilestones.map((milestone) => (
+                      <ActionList.Item
+                        key={milestone.id}
+                        selected={selectedMilestone?.id === milestone.id}
+                        onSelect={() => setSelectedMilestone(milestone)}
+                      >
+                        {milestone.text}
+                        {milestone.description && (
+                          <ActionList.Description>
+                            {milestone.description}
+                          </ActionList.Description>
+                        )}
+                      </ActionList.Item>
+                    ))}
+                  </>
+                )}
+              </ActionList>
+            </ActionMenu.Overlay>
+          </ActionMenu>
+  
+          {/* Issue Types dropdown */}
+          <ActionMenu>
+            <ActionMenu.Button size="small" leadingVisual={IssueOpenedIcon}>
+              {selectedIssueType ? selectedIssueType.text : "Type"}
+            </ActionMenu.Button>
+            <ActionMenu.Overlay width="medium">
+              <ActionList selectionVariant="single">
+                {issueTypesLoading ? (
+                  <ActionList.Item disabled>
+                    <Spinner size="small" /> Loading...
+                  </ActionList.Item>
+                ) : availableIssueTypes.length === 0 ? (
+                  <ActionList.Item disabled>No issue types</ActionList.Item>
+                ) : (
+                  <>
+                    {selectedIssueType && (
+                      <ActionList.Item
+                        onSelect={() => setSelectedIssueType(null)}
+                      >
+                        Clear selection
+                      </ActionList.Item>
+                    )}
+                    {availableIssueTypes.map((type) => (
+                      <ActionList.Item
+                        key={type.id}
+                        selected={selectedIssueType?.id === type.id}
+                        onSelect={() => setSelectedIssueType(type)}
+                      >
+                        {type.text}
+                      </ActionList.Item>
+                    ))}
+                  </>
+                )}
+              </ActionList>
+            </ActionMenu.Overlay>
+          </ActionMenu>
+        </Box>
+  
+        {/* Fields section */}
+        {availableIssueFields.length > 0 && (
+          <Box mb={3}>
+            <Text sx={{ fontWeight: "semibold", display: "block", mb: 3 }}>
+              Fields
+            </Text>
+            <Box
+              display="grid"
+              sx={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}
+            >
+              {availableIssueFields.map((field) => {
+                const fieldValue = fieldValues[field.name];
+                const hasFieldValue =
+                  fieldValue &&
+                  !fieldValue.cleared &&
+                  (fieldValue.optionName !== undefined ||
+                    (fieldValue.value !== undefined && fieldValue.value !== ""));
+  
+                return (
+                  <Box key={field.id || field.name}>
+                    <Text sx={{ fontWeight: "semibold", fontSize: 1, display: "block" }}>
+                      {field.name}
+                    </Text>
+                    {field.description && (
+                      <Text sx={{ color: "fg.muted", fontSize: 0, display: "block", mt: 1, mb: 2 }}>
+                        {field.description}
+                      </Text>
+                    )}
+                    <Box display="flex" alignItems="center" gap={2} mt={field.description ? 0 : 2}>
+                      {renderIssueFieldInput(field)}
+                      {hasFieldValue && (
+                        <Button
+                          variant="invisible"
+                          size="small"
+                          sx={{ fontSize: 0, color: "fg.muted" }}
+                          onClick={() => updateIssueFieldValue(field.name, { cleared: true })}
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+          </Box>
+        )}
+  
+        {/* Selected labels display */}
+        {selectedLabels.length > 0 && (
+          <Box display="flex" gap={1} mb={3} flexWrap="wrap">
+            {selectedLabels.map((label) => (
+              <Label
+                key={label.id}
+                sx={{
+                  backgroundColor: `#${label.color}`,
+                  color: getContrastColor(label.color),
+                  borderColor: `#${label.color}`,
+                }}
               >
-                Reopen issue
-              </Button>
+                {label.text}
+              </Label>
+            ))}
+          </Box>
+        )}
+  
+        {/* Selected metadata display */}
+        {(selectedAssignees.length > 0 || selectedMilestone) && (
+          <Box mb={3} sx={{ fontSize: 0, color: "fg.muted" }}>
+            {selectedAssignees.length > 0 && (
+              <Text as="div">
+                Assigned to: {selectedAssignees.map((a) => a.text).join(", ")}
+              </Text>
+            )}
+            {selectedMilestone && (
+              <Text as="div">Milestone: {selectedMilestone.text}</Text>
             )}
           </Box>
         )}
-
-        <Button
-          variant="primary"
-          onClick={() => void handleSubmit()}
-          disabled={isSubmitting || !title.trim()}
+  
+        {/* State and submit actions */}
+        <Box
+          display="flex"
+          justifyContent={isUpdateMode ? "space-between" : "flex-end"}
+          alignItems="center"
+          gap={3}
+          sx={{ flexWrap: "wrap" }}
         >
-          {isSubmitting ? (
-            <>
-              <Spinner size="small" sx={{ mr: 1 }} />
-              {isUpdateMode ? "Updating..." : "Creating..."}
-            </>
-          ) : (
-            isUpdateMode ? "Update issue" : "Create issue"
+          {isUpdateMode && (
+            <Box>
+              {currentState === "open" ? (
+                <>
+                  <Box display="flex" alignItems="center" gap={0}>
+                    <Button
+                      size="small"
+                      variant="danger"
+                      onClick={() => void handleSubmit("closed")}
+                      disabled={isSubmitting || !title.trim() || (stateReason === "duplicate" && !duplicateOf.trim())}
+                      sx={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                    >
+                      Close issue
+                    </Button>
+                    <ActionMenu>
+                      <ActionMenu.Button
+                        size="small"
+                        sx={{ ml: "-1px", borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                      >
+                        {selectedStateReason.label}
+                      </ActionMenu.Button>
+                      <ActionMenu.Overlay width="medium">
+                        <ActionList selectionVariant="single">
+                          {stateReasonOptions.map((option) => (
+                            <ActionList.Item
+                              key={option.value}
+                              selected={stateReason === option.value}
+                              onSelect={() => setStateReason(option.value)}
+                            >
+                              {option.label}
+                              <ActionList.Description>{option.description}</ActionList.Description>
+                            </ActionList.Item>
+                          ))}
+                        </ActionList>
+                      </ActionMenu.Overlay>
+                    </ActionMenu>
+                  </Box>
+                  {stateReason === "duplicate" && (
+                    <FormControl sx={{ mt: 2 }}>
+                      <FormControl.Label sx={{ fontSize: 0 }}>Duplicate of</FormControl.Label>
+                      <TextInput
+                        type="number"
+                        placeholder="Issue number"
+                        value={duplicateOf}
+                        onChange={(e) => setDuplicateOf(e.target.value)}
+                        size="small"
+                        sx={{ width: 140 }}
+                      />
+                    </FormControl>
+                  )}
+                </>
+              ) : (
+                <Button
+                  size="small"
+                  onClick={() => void handleSubmit("open")}
+                  disabled={isSubmitting || !title.trim()}
+                >
+                  Reopen issue
+                </Button>
+              )}
+            </Box>
           )}
-        </Button>
+  
+          <Button
+            variant="primary"
+            onClick={() => void handleSubmit()}
+            disabled={isSubmitting || !title.trim()}
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner size="small" sx={{ mr: 1 }} />
+                {isUpdateMode ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              isUpdateMode ? "Update issue" : "Create issue"
+            )}
+          </Button>
+        </Box>
       </Box>
-    </Box>
-  );
+    );
   })();
 
-  return <AppProvider hostContext={hostContext}>{body_node}</AppProvider>;
+  return <AppProvider hostContext={hostContext}>{bodyNode}</AppProvider>;
 }
 
 createRoot(document.getElementById("root")!).render(
