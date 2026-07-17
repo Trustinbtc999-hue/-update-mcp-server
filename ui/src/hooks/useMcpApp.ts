@@ -115,7 +115,10 @@ export function useMcpApp({
   const openLink = useCallback<UseMcpAppReturn["openLink"]>(
     async (url) => {
       const normalizedUrl = normalizeHttpUrl(url);
-      if (!normalizedUrl) return;
+      if (!normalizedUrl) {
+        console.warn("Ignored non-http(s) URL in openLink", { url });
+        return;
+      }
 
       if (!app) {
         window.open(normalizedUrl, "_blank", "noopener,noreferrer");
